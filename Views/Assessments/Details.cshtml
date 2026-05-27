@@ -1,0 +1,104 @@
+@model EduTrack.Models.Assessment
+@{ ViewData["Title"] = Model.Title; }
+
+<div class="row g-3">
+    <div class="col-md-7">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex gap-2 mb-2">
+                    <span class="badge @(Model.Type == "Quiz" ? "bg-info" : Model.Type == "Exam" ? "bg-danger" : "bg-secondary")">@Model.Type</span>
+                    <span class="badge bg-light text-dark">Max: @Model.MaxScore pts</span>
+                    @if (Model.DueDate.HasValue)
+                    { <span class="badge bg-warning text-dark">Due: @Model.DueDate.Value.ToString("MMM dd, yyyy")</span> }
+                </div>
+                <h4 class="fw-bold">@Model.Title</h4>
+                <p class="text-muted">@Model.Description</p>
+                <a asp-controller="Courses" asp-action="Details" asp-route-id="@Model.CourseId" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Course
+                </a>
+            </div>
+        </div>
+
+        @if (User.IsInRole("Student"))
+        {
+            var submission = ViewBag.UserSubmission as EduTrack.Models.AssessmentSubmission;
+            @if (submission != null)
+            {
+                <div class="card border-success">
+                    <div class="card-body">
+                        <h6 class="fw-bold text-success"><i class="fas fa-check-circle me-2"></i>Submitted</h6>
+                        <p class="text-muted small">@submission.AnswerText</p>
+                        @if (submission.Score.HasValue)
+                        {
+                            <div class="alert alert-success py-2">
+                                <strong>Score: @submission.Score / @Model.MaxScore</strong>
+                                @if (!string.IsNullOrEmpty(submission.Feedback))
+                                { <div class="mt-1 small">Feedback: @submission.Feedback</div> }
+                            </div>
+                        }
+                        else
+                        { <span class="badge bg-warning text-dark">Awaiting grade</span> }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <h6 class="fw-bold mb-3"><i class="fas fa-pencil-alt text-primary me-2"></i>Submit Answer</h6>
+                        <form asp-action="Submit" method="post">
+                            <input type="hidden" name="assessmentId" value="@Model.Id" />
+                            <div class="mb-3">
+                                <textarea name="answerText" class="form-control" rows="5" required placeholder="Type your answer here..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane me-1"></i>Submit</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
+    {
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-list-check text-primary me-2"></i>Submissions (@Model.Submissions.Count)</h6>
+                    @if (!Model.Submissions.Any())
+                    { <p class="text-muted small">No submissions yet.</p> }
+                    @foreach (var s in Model.Submissions)
+                    {
+                        <div class="border rounded p-3 mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong class="small">@s.Student?.FullName</strong>
+                                    <p class="text-muted small mb-1">@(s.AnswerText.Length > 60 ? s.AnswerText.Substring(0, 60) + "..." : s.AnswerText)</p>
+                                </div>
+                                @if (s.Status == "Graded")
+                                { <span class="badge bg-success">@s.Score pts</span> }
+                                else
+                                { <span class="badge bg-warning text-dark">Ungraded</span> }
+                            </div>
+                            @if (s.Status != "Graded")
+                            {
+                                <form asp-action="Grade" method="post" class="mt-2 row g-1">
+                                    <input type="hidden" name="submissionId" value="@s.Id" />
+                                    <div class="col-4">
+                                        <input type="number" name="score" class="form-control form-control-sm" placeholder="Score" min="0" max="@Model.MaxScore" required />
+                                    </div>
+                                    <div class="col-5">
+                                        <input type="text" name="feedback" class="form-control form-control-sm" placeholder="Feedback" />
+                                    </div>
+                                    <div class="col-3">
+                                        <button class="btn btn-sm btn-success w-100">Grade</button>
+                                    </div>
+                                </form>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

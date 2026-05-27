@@ -1,0 +1,140 @@
+@model EduTrack.Models.Course
+@{ ViewData["Title"] = Model.Title; }
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex gap-2 mb-2">
+                    <span class="badge bg-secondary">@Model.CourseCode</span>
+                    <span class="badge" style="background:#e8f5e9;color:#2e7d32">@Model.Category</span>
+                    @if(Model.IsPublished) { <span class="badge bg-success">Published</span> }
+                    else { <span class="badge bg-warning text-dark">Draft</span> }
+                </div>
+                <h4 class="fw-bold">@Model.Title</h4>
+                <p class="text-muted">@Model.Description</p>
+                <div class="text-muted small">
+                    <i class="fas fa-chalkboard-teacher me-1"></i>Instructor: <strong>@Model.Teacher?.FullName</strong> &nbsp;|&nbsp;
+                    <i class="fas fa-calendar me-1"></i>@Model.CreatedAt.ToString("MMM dd, yyyy")
+                </div>
+            </div>
+        </div>
+
+        <!-- Lessons -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-list-ul text-primary me-2"></i>Lessons (@Model.Lessons.Count)</h6>
+                    @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Lessons" asp-action="Create" asp-route-courseId="@Model.Id" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-plus me-1"></i>Add Lesson
+                        </a>
+                    }
+                </div>
+                @if (!Model.Lessons.Any())
+                { <p class="text-muted small">No lessons yet.</p> }
+                @foreach (var lesson in Model.Lessons)
+                {
+                    <div class="border rounded p-3 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="badge bg-light text-dark me-2">@lesson.Order</span>
+                                <strong>@lesson.Title</strong>
+                                <p class="text-muted small mt-1 mb-0">@(lesson.Content.Length > 120 ? lesson.Content.Substring(0, 120) + "..." : lesson.Content)</p>
+                            </div>
+                            @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
+                            {
+                                <div class="d-flex gap-1 flex-shrink-0 ms-2">
+                                    <a asp-controller="Lessons" asp-action="Edit" asp-route-id="@lesson.Id" class="btn btn-sm btn-outline-secondary"><i class="fas fa-edit"></i></a>
+                                    <form asp-controller="Lessons" asp-action="Delete" asp-route-id="@lesson.Id" method="post" onsubmit="return confirm('Delete lesson?')">
+                                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Assessments -->
+        <div class="card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0"><i class="fas fa-tasks text-warning me-2"></i>Assessments (@Model.Assessments.Count)</h6>
+                    @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Assessments" asp-action="Create" asp-route-courseId="@Model.Id" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-plus me-1"></i>Add Assessment
+                        </a>
+                    }
+                </div>
+                @foreach (var a in Model.Assessments)
+                {
+                    <div class="border rounded p-3 mb-2 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="badge @(a.Type == "Quiz" ? "bg-info" : a.Type == "Exam" ? "bg-danger" : "bg-secondary") me-2">@a.Type</span>
+                            <strong>@a.Title</strong>
+                            @if (a.DueDate.HasValue)
+                            { <span class="text-muted small ms-2"><i class="fas fa-clock"></i> Due @a.DueDate.Value.ToString("MMM dd")</span> }
+                        </div>
+                        <a asp-controller="Assessments" asp-action="Details" asp-route-id="@a.Id" class="btn btn-sm btn-outline-primary">Open</a>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        @if (User.IsInRole("Student"))
+        {
+            <div class="card mb-3">
+                <div class="card-body text-center">
+                    @if ((bool)ViewBag.IsEnrolled)
+                    {
+                        <div class="text-success mb-2"><i class="fas fa-check-circle fa-2x"></i></div>
+                        <p class="fw-semibold">You are enrolled!</p>
+                    }
+                    else
+                    {
+                        <form asp-action="Enroll" method="post">
+                            <input type="hidden" name="courseId" value="@Model.Id" />
+                            <button class="btn btn-success w-100"><i class="fas fa-user-plus me-2"></i>Enroll Now</button>
+                        </form>
+                    }
+                </div>
+            </div>
+        }
+        @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
+        {
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="fw-bold mb-3">Course Actions</h6>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary w-100 mb-2"><i class="fas fa-edit me-2"></i>Edit Course</a>
+                    <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger w-100"><i class="fas fa-trash me-2"></i>Delete Course</a>
+                </div>
+            </div>
+        }
+        <div class="card">
+            <div class="card-body">
+                <h6 class="fw-bold mb-3"><i class="fas fa-users me-2 text-primary"></i>Enrolled Students (@Model.Enrollments.Count)</h6>
+                @foreach (var e in Model.Enrollments)
+                {
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2 flex-shrink-0"
+                             style="width:32px;height:32px;font-size:.8rem">
+                            @e.Student?.FullName.Substring(0, 1).ToUpper()
+                        </div>
+                        <div>
+                            <div class="fw-semibold" style="font-size:.85rem">@e.Student?.FullName</div>
+                            <div class="progress" style="width:100px;height:5px;margin-top:2px">
+                                <div class="progress-bar bg-success" style="width:@e.Progress%"></div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

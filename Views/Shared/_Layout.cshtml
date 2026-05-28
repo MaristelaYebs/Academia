@@ -1,38 +1,48 @@
-﻿<!DOCTYPE html>
+﻿@using EduTrack.Models
+@using EduTrack.Services
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> userManager
+@inject INotificationService notificationService
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - EduTrack</title>
+    <title>@ViewData["Title"] - Academia</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
     <style>
         :root {
-            --primary: #1a73e8;
-            --secondary: #34a853;
-            --accent: #fbbc04;
-            --danger: #ea4335;
-            --dark: #1e1e2e;
+            --primary: #4e9fc7;
+            --secondary: #3aa6a0;
+            --accent: #ea8b3a;
+            --danger: #c95454;
+            --dark: #555c66;
+            --light-bg: #f3f5f7;
+            --card-bg: #ffffff;
+            --muted-silver: #d4d8de;
             --sidebar-width: 260px;
         }
-        body { background: #f0f4f8; font-family: 'Segoe UI', sans-serif; }
+        body { background: var(--light-bg); font-family: 'Segoe UI', sans-serif; color: #2b3138; }
         .sidebar {
             position: fixed; top: 0; left: 0; height: 100vh;
-            width: var(--sidebar-width); background: var(--dark);
+            width: var(--sidebar-width); background: linear-gradient(180deg, #636973 0%, #555c66 55%, #4d545e 100%);
             color: white; z-index: 1000; overflow-y: auto;
             transition: all 0.3s;
+            box-shadow: 8px 0 24px rgba(60, 68, 78, 0.22);
         }
         .sidebar .brand {
-            padding: 1.5rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.1);
-            font-size: 1.3rem; font-weight: 700; color: var(--accent);
+            padding: 1.5rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.18);
+            font-size: 1.3rem; font-weight: 800; color: #f2f5f8;
+            letter-spacing: 0.5px;
         }
-        .sidebar .brand span { color: white; }
+        .sidebar .brand i { color: var(--accent); }
+        .sidebar .brand span { color: #9fd7f3; }
         .sidebar .nav-link {
-            color: rgba(255,255,255,0.7); padding: 0.75rem 1.25rem;
+            color: rgba(255,255,255,0.82); padding: 0.75rem 1.25rem;
             border-radius: 8px; margin: 2px 8px; transition: all 0.2s;
         }
         .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: rgba(255,255,255,0.1); color: white;
+            background: rgba(159, 215, 243, 0.24); color: white;
         }
         .sidebar .nav-link i { width: 20px; margin-right: 8px; }
         .main-content {
@@ -40,15 +50,17 @@
             min-height: 100vh;
         }
         .topbar {
-            background: white; padding: 1rem 1.5rem;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            background: rgba(255,255,255,0.92); padding: 1rem 1.5rem;
+            box-shadow: 0 3px 14px rgba(84, 92, 102, 0.12);
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 100;
+            backdrop-filter: blur(8px);
         }
         .page-content { padding: 1.5rem; }
-        .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .card { border: 1px solid #e7ebef; border-radius: 14px; box-shadow: 0 6px 18px rgba(74, 84, 96, 0.07); background: var(--card-bg); }
         .stat-card { border-radius: 12px; padding: 1.5rem; color: white; }
         .btn-primary { background: var(--primary); border-color: var(--primary); }
+        .btn-primary:hover { background: #458eb2; border-color: #458eb2; }
         .badge-role {
             padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
         }
@@ -64,8 +76,14 @@
 <body>
 @if (User.Identity?.IsAuthenticated == true)
 {
+    var notificationCount = 0;
+    var currentUser = await userManager.GetUserAsync(User);
+    if (currentUser != null)
+    {
+        notificationCount = await notificationService.GetUnreadCountAsync(currentUser);
+    }
     <div class="sidebar">
-        <div class="brand"><i class="fas fa-graduation-cap me-2"></i>Edu<span>Track</span></div>
+        <div class="brand"><i class="fas fa-pen-nib me-2"></i>Academ<span>ia</span></div>
         <nav class="nav flex-column mt-3">
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "")"
                asp-controller="Dashboard" asp-action="Index">
@@ -74,6 +92,17 @@
             <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Courses" ? "active" : "")"
                asp-controller="Courses" asp-action="Index">
                 <i class="fas fa-book"></i> Courses
+            </a>
+            @if (User.IsInRole("Student"))
+            {
+                <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Todo" ? "active" : "")"
+                   asp-controller="Todo" asp-action="Index">
+                    <i class="fas fa-list-check"></i> To Do
+                </a>
+            }
+            <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Notifications" ? "active" : "")"
+               asp-controller="Notifications" asp-action="Index">
+                <i class="fas fa-bell"></i> Notifications
             </a>
             @if (User.IsInRole("Admin") || User.IsInRole("Teacher"))
             {
@@ -94,6 +123,15 @@
         <div class="topbar">
             <h6 class="mb-0 fw-bold text-muted">@ViewData["Title"]</h6>
             <div class="d-flex align-items-center gap-3">
+                <a asp-controller="Notifications" asp-action="Index" class="text-decoration-none position-relative text-muted">
+                    <i class="fas fa-bell fa-lg"></i>
+                    @if (notificationCount > 0)
+                    {
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            @(notificationCount > 9 ? "9+" : notificationCount.ToString())
+                        </span>
+                    }
+                </a>
                 <span class="badge badge-role" style="background:var(--primary)">
                     @(User.IsInRole("Admin") ? "Admin" : User.IsInRole("Teacher") ? "Teacher" : "Student")
                 </span>
@@ -105,6 +143,13 @@
             {
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }

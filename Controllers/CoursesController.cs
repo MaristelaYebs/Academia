@@ -62,6 +62,15 @@ namespace EduTrack.Controllers
             ViewBag.IsEnrolled = await _context.Enrollments
                 .AnyAsync(e => e.StudentId == user!.Id && e.CourseId == id);
             ViewBag.CurrentUserId = user?.Id;
+            if (User.IsInRole("Admin"))
+            {
+                var enrolledStudentIds = course.Enrollments.Select(e => e.StudentId).ToHashSet();
+                var students = await _userManager.GetUsersInRoleAsync("Student");
+                ViewBag.AvailableStudents = students
+                    .Where(s => !enrolledStudentIds.Contains(s.Id))
+                    .OrderBy(s => s.FullName)
+                    .ToList();
+            }
             return View(course);
         }
 
@@ -142,17 +151,72 @@ namespace EduTrack.Controllers
 
         [HttpPost]
         [Authorize(Roles = "Student")]
-        public async Task<IActionResult> Enroll(int courseId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EnrollByCode(string courseCode)
         {
             var user = await _userManager.GetUserAsync(User);
-            var already = await _context.Enrollments.AnyAsync(e => e.StudentId == user!.Id && e.CourseId == courseId);
+            if (string.IsNullOrWhiteSpace(courseCode))
+            {
+                TempData["Error"] = "Please enter a course code.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var trimmedCode = courseCode.Trim();
+            var course = await _context.Courses
+                .FirstOrDefaultAsync(c => c.CourseCode == trimmedCode && c.IsPublished);
+            if (course == null)
+            {
+                TempData["Error"] = "Invalid course code or the course is not published.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var already = await _context.Enrollments.AnyAsync(e => e.StudentId == user!.Id && e.CourseId == course.Id);
             if (!already)
             {
-                _context.Enrollments.Add(new Enrollment { StudentId = user!.Id, CourseId = courseId });
+                _context.Enrollments.Add(new Enrollment { StudentId = user!.Id, CourseId = course.Id });
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Enrolled successfully!";
             }
-            return RedirectToAction("Details", new { id = courseId });
+            else
+            {
+                TempData["Success"] = "You are already enrolled in this course.";
+            }
+
+            return RedirectToAction(nameof(Details), new { id = course.Id });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EnrollStudent(int courseId, string studentId)
+        {
+            if (string.IsNullOrWhiteSpace(studentId))
+            {
+                TempData["Error"] = "Please select a student.";
+                return RedirectToAction(nameof(Details), new { id = courseId });
+            }
+
+            var course = await _context.Courses.FindAsync(courseId);
+            if (course == null) return NotFound();
+
+            var student = await _userManager.FindByIdAsync(studentId);
+            if (student == null || !await _userManager.IsInRoleAsync(student, "Student"))
+            {
+                TempData["Error"] = "Selected user is not a valid student.";
+                return RedirectToAction(nameof(Details), new { id = courseId });
+            }
+
+            var already = await _context.Enrollments.AnyAsync(e => e.StudentId == studentId && e.CourseId == courseId);
+            if (already)
+            {
+                TempData["Success"] = $"{student.FullName} is already enrolled.";
+                return RedirectToAction(nameof(Details), new { id = courseId });
+            }
+
+            _context.Enrollments.Add(new Enrollment { StudentId = studentId, CourseId = courseId });
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"{student.FullName} enrolled successfully.";
+            return RedirectToAction(nameof(Details), new { id = courseId });
         }
     }
 }

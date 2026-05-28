@@ -1,0 +1,67 @@
+@model IEnumerable<EduTrack.Models.ViewModels.TodoItemViewModel>
+@{
+    ViewData["Title"] = "To Do";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0">My To Do Activities</h5>
+    <span class="badge bg-primary">@Model.Count() items</span>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-list-check fa-3x text-muted mb-3"></i>
+                <p class="text-muted mb-0">No activities yet. Enroll in a course to see tasks here.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Activity</th>
+                            <th>Course</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-semibold">@item.Title</div>
+                                <div class="text-muted small">@item.ActivityType</div>
+                            </td>
+                            <td class="text-muted">@item.CourseTitle</td>
+                            <td>
+                                @if (item.Status == "Pending")
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                                else if (item.Status == "Submitted")
+                                {
+                                    <span class="badge bg-success">Submitted</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-info text-dark">@item.Status</span>
+                                }
+                            </td>
+                            <td class="text-muted">@item.SortDate.ToString("MMM dd, yyyy")</td>
+                            <td>
+                                <a href="@item.ActionUrl" class="btn btn-sm btn-outline-primary">@item.ActionText</a>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

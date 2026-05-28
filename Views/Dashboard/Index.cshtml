@@ -3,7 +3,7 @@
 
 <div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="stat-card" style="background:linear-gradient(135deg,#1a73e8,#0d47a1)">
+        <div class="stat-card" style="background:linear-gradient(135deg,#4e9fc7,#3b86aa)">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <div style="font-size:.85rem;opacity:.8">Total Courses</div>
@@ -16,7 +16,7 @@
     @if (User.IsInRole("Admin"))
     {
         <div class="col-md-3">
-            <div class="stat-card" style="background:linear-gradient(135deg,#34a853,#1e7e34)">
+            <div class="stat-card" style="background:linear-gradient(135deg,#3aa6a0,#2d7d79)">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div style="font-size:.85rem;opacity:.8">Students</div>
@@ -28,7 +28,7 @@
         </div>
     }
     <div class="col-md-3">
-        <div class="stat-card" style="background:linear-gradient(135deg,#fbbc04,#e37400)">
+        <div class="stat-card" style="background:linear-gradient(135deg,#ea8b3a,#cf7324)">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <div style="font-size:.85rem;opacity:.8">Enrollments</div>
@@ -39,7 +39,7 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="stat-card" style="background:linear-gradient(135deg,#ea4335,#b31412)">
+        <div class="stat-card" style="background:linear-gradient(135deg,#6b7280,#555c66)">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
                     <div style="font-size:.85rem;opacity:.8">Avg Score</div>
@@ -76,7 +76,16 @@
                                         <a asp-controller="Courses" asp-action="Details" asp-route-id="@c.Id" class="text-decoration-none fw-semibold">@c.Title</a>
                                         <div class="text-muted" style="font-size:.8rem">@c.Category</div>
                                     </td>
-                                    <td><span class="badge bg-secondary">@c.CourseCode</span></td>
+                                    <td>
+                                        @if (User.IsInRole("Teacher") || User.IsInRole("Admin"))
+                                        {
+                                            <span class="badge bg-secondary">@c.CourseCode</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Hidden</span>
+                                        }
+                                    </td>
                                     <td>
                                         @if (c.IsPublished)
                                         { <span class="badge bg-success">Published</span> }
@@ -120,13 +129,6 @@
                         </div>
                     }
                 }
-            </div>
-        </div>
-        <div class="card mt-3">
-            <div class="card-body text-center p-4" style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border-radius:12px;">
-                <i class="fas fa-globe fa-2x text-success mb-2"></i>
-                <h6 class="fw-bold">SDG 4: Quality Education</h6>
-                <p class="text-muted small mb-0">EduTrack ensures inclusive, equitable, quality education and promotes lifelong learning opportunities for all.</p>
             </div>
         </div>
     </div>

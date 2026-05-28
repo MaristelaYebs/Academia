@@ -1,5 +1,6 @@
 using EduTrack.Data;
 using EduTrack.Models;
+using EduTrack.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,6 +29,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 var app = builder.Build();
 
@@ -71,15 +73,48 @@ using (var scope = app.Services.CreateScope())
         await userManager.AddToRoleAsync(admin, "Admin");
     }
 
+    var demoStudentNames = new[]
+    {
+        "John Mark Dela Cruz",
+        "Maria Angelica Santos",
+        "Joshua Miguel Reyes",
+        "Anne Patricia Garcia",
+        "Carlo Vincent Mendoza",
+        "Kimberly Joy Flores",
+        "Jericho Paolo Ramos",
+        "Christine Mae Aquino",
+        "Rafael Dominic Navarro",
+        "Jasmine Claire Bautista",
+        "Francis Ivan Castillo",
+        "Nicole Andrea Villanueva",
+        "Mark Anthony Salazar",
+        "Danica Rose Cabrera",
+        "Paolo Martin Gonzales",
+        "Trisha Mae Fernandez",
+        "Kevin Lloyd Morales",
+        "Bea Therese Herrera",
+        "Nathaniel Jude Ortega",
+        "Alyssa Mae Valdez"
+    };
+
     // Seed demo students (idempotent).
     for (int i = 1; i <= 20; i++)
     {
         var studentEmail = $"student{i:00}@edutrack.com";
-        if (await userManager.FindByEmailAsync(studentEmail) != null) continue;
+        var existingStudent = await userManager.FindByEmailAsync(studentEmail);
+        if (existingStudent != null)
+        {
+            if (existingStudent.FullName != demoStudentNames[i - 1])
+            {
+                existingStudent.FullName = demoStudentNames[i - 1];
+                await userManager.UpdateAsync(existingStudent);
+            }
+            continue;
+        }
 
         var student = new ApplicationUser
         {
-            FullName = $"Student {i:00}",
+            FullName = demoStudentNames[i - 1],
             UserName = studentEmail,
             Email = studentEmail,
             Role = "Student"

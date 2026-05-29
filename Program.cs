@@ -1,6 +1,6 @@
-using EduTrack.Data;
-using EduTrack.Models;
-using EduTrack.Services;
+using Academia.Data;
+using Academia.Models;
+using Academia.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -59,7 +59,7 @@ using (var scope = app.Services.CreateScope())
     }
 
     // Seed Admin
-    var adminEmail = "admin@edutrack.com";
+    var adminEmail = "admin@Academia.com";
     if (await userManager.FindByEmailAsync(adminEmail) == null)
     {
         var admin = new ApplicationUser
@@ -100,7 +100,7 @@ using (var scope = app.Services.CreateScope())
     // Seed demo students (idempotent).
     for (int i = 1; i <= 20; i++)
     {
-        var studentEmail = $"student{i:00}@edutrack.com";
+        var studentEmail = $"student{i:00}@Academia.com";
         var existingStudent = await userManager.FindByEmailAsync(studentEmail);
         if (existingStudent != null)
         {

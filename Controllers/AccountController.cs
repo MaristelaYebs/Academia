@@ -1,10 +1,10 @@
-using EduTrack.Models;
-using EduTrack.Models.ViewModels;
+using Academia.Models;
+using Academia.Models.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
-namespace EduTrack.Controllers
+namespace Academia.Controllers
 {
 	public class AccountController : Controller
 	{

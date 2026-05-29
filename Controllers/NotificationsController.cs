@@ -1,10 +1,10 @@
-using EduTrack.Models;
-using EduTrack.Services;
+using Academia.Models;
+using Academia.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EduTrack.Controllers
+namespace Academia.Controllers
 {
     [Authorize]
     public class NotificationsController : Controller

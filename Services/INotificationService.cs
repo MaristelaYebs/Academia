@@ -1,7 +1,7 @@
-using EduTrack.Models;
-using EduTrack.Models.ViewModels;
+using Academia.Models;
+using Academia.Models.ViewModels;
 
-namespace EduTrack.Services
+namespace Academia.Services
 {
     public interface INotificationService
     {

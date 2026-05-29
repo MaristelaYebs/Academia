@@ -1,9 +1,9 @@
-using EduTrack.Data;
-using EduTrack.Models;
-using EduTrack.Models.ViewModels;
+using Academia.Data;
+using Academia.Models;
+using Academia.Models.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace EduTrack.Services
+namespace Academia.Services
 {
     public class NotificationService : INotificationService
     {

@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace EduTrack.Models
+namespace Academia.Models
 {
     public class Lesson
     {

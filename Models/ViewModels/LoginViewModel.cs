@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EduTrack.Models.ViewModels
+namespace Academia.Models.ViewModels
 {
     public class LoginViewModel
     {

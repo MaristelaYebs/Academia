@@ -1,4 +1,4 @@
-@model EduTrack.Models.Assessment
+@model Academia.Models.Assessment
 @{ ViewData["Title"] = Model.Title; }
 
 <div class="row g-3">
@@ -21,7 +21,7 @@
 
         @if (User.IsInRole("Student"))
         {
-            var submission = ViewBag.UserSubmission as EduTrack.Models.AssessmentSubmission;
+            var submission = ViewBag.UserSubmission as Academia.Models.AssessmentSubmission;
             @if (submission != null)
             {
                 <div class="card border-success">

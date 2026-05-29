@@ -1,8 +1,8 @@
-using EduTrack.Models;
+using Academia.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace EduTrack.Data
+namespace Academia.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {

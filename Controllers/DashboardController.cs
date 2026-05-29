@@ -1,13 +1,13 @@
-using EduTrack.Data;
-using EduTrack.Models;
-using EduTrack.Models.ViewModels;
+using Academia.Data;
+using Academia.Models;
+using Academia.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 
-namespace EduTrack.Controllers
+namespace Academia.Controllers
 {
     [Authorize]
     public class DashboardController : Controller

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 
-namespace EduTrack.Models
+namespace Academia.Models
 {
     public class ApplicationUser : IdentityUser
     {

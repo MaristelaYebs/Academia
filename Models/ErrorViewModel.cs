@@ -1,4 +1,4 @@
-namespace EduTrack.Models;
+namespace Academia.Models;
 
 public class ErrorViewModel
 {

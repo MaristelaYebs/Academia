@@ -1,6 +1,6 @@
 using System;
 
-namespace EduTrack.Models.ViewModels
+namespace Academia.Models.ViewModels
 {
     public class TodoItemViewModel
     {
